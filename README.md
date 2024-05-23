@@ -10,9 +10,8 @@
 
 các bước để chay web:
 1. chạy git bash
-2. gõ cd ecom/
-3. gõ python manage.py runserver
-4. vào 127.0.0.1:8000
+2. gõ python manage.py runserver
+3. vào 127.0.0.1:8000
 có thể vào http://127.0.0.1:8000/admin để vào chỉnh dữ liệu trang
 admin account:
 username: admin
