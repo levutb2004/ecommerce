@@ -5,9 +5,12 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .forms import SignUpForm, UpdateUserForm, ChangePasswordForm, UserInfoForm
+import pandas as pd
+import random
+
 
 from payment.forms import ShippingForm
-from payment.models import ShippingAddress
+from payment.models import ShippingAddress, Order, OrderItem
 
 from django import forms
 from django.db.models import Q
@@ -186,5 +189,27 @@ def register_user(request):
 	else:
 		return render(request, 'register.html', {'form':form})
 
-def recommendation(request):
-    return render(request, 'recommendation.html', {})
+def recommend(request):
+    items = OrderItem.objects.filter(user__id=request.user.id)
+    categories = Category.objects.all()
+    df = pd.DataFrame({"category":categories,
+                "quantities":[0]*categories.__len__()})
+    total_products = 0
+    for item in items:
+        df['quantities'][df.loc[df['category'] == item.product.category].index] += 1
+        total_products += 1
+        
+    weights = []
+    for category in categories:
+        weights.append(float(df['quantities'][df.loc[df['category'] == category].index])/total_products)
+        
+    rand_choices = random.choices(categories, weights=weights,k=len(categories))
+    print(rand_choices)
+    
+    recommendation = []
+    for choice in rand_choices:
+        products_temp = Product.objects.filter(category = choice)
+        recommendation.append(random.choice(products_temp))
+    print(recommendation)
+    return render(request, 'recommend.html', {'recommendation': recommendation})
+
